@@ -48,7 +48,9 @@ export const links: LinksFunction = () => [
   { rel: "apple-touch-icon", sizes: "180x180", href: icon180 },
   { rel: "apple-touch-icon", sizes: "512x512", href: icon512 },
   { rel: "manifest", href: "/manifest.json" },
-  { rel: "stylesheet", href: globalStyles },
+  // The global stylesheet is preloaded here but applied from the end of
+  // <body>, so it does not block first paint of the inline boot shell.
+  { rel: "preload", href: globalStyles, as: "style" },
   {
     rel: "preload",
     href: interVariableWoff2,
@@ -84,6 +86,7 @@ export function Layout({ children }: { children: ReactNode }) {
         <ThemeProvider themes={["light", "dark", "light-contrast", "dark-contrast", "custom"]} defaultTheme="system">
           {children}
         </ThemeProvider>
+        <link rel="stylesheet" href={globalStyles} />
         <Scripts />
       </body>
     </html>
