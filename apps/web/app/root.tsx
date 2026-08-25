@@ -5,7 +5,8 @@
  */
 
 import type { ReactNode } from "react";
-import { Links, Meta, Outlet, Scripts } from "react-router";
+import { useEffect } from "react";
+import { Links, Meta, Outlet, Scripts, useLocation } from "react-router";
 import type { LinksFunction } from "react-router";
 import { ThemeProvider, useTheme } from "next-themes";
 // plane imports
@@ -24,8 +25,10 @@ import type { Route } from "./+types/root";
 // components
 import { LogoSpinner } from "@/components/common/logo-spinner";
 // lib
+import { dismissBootShell } from "@/lib/boot-shell";
 import { isStaleAssetError, recoverFromStaleAsset } from "@/lib/stale-asset-error";
 // local
+import { BOOT_SHELL_ROUTE_SCRIPT, BOOT_SHELL_STYLE, StaticBootShell } from "./boot-shell";
 import { CustomErrorComponent } from "./error";
 import { AppProvider } from "./provider";
 // fonts
@@ -71,8 +74,11 @@ export function Layout({ children }: { children: ReactNode }) {
         <meta name="mobile-web-app-capable" content="yes" />
         <Meta />
         <Links />
+        <style dangerouslySetInnerHTML={{ __html: BOOT_SHELL_STYLE }} />
       </head>
       <body suppressHydrationWarning>
+        <script dangerouslySetInnerHTML={{ __html: BOOT_SHELL_ROUTE_SCRIPT }} />
+        <StaticBootShell />
         <div id="context-menu-portal" />
         <div id="editor-portal" />
         <ThemeProvider themes={["light", "dark", "light-contrast", "dark-contrast", "custom"]} defaultTheme="system">
@@ -111,6 +117,14 @@ export const meta: Route.MetaFunction = () => [
 ];
 
 export default function Root() {
+  const { pathname } = useLocation();
+
+  // The static boot shell mirrors the sign-in page, so any other route can
+  // drop it as soon as the app takes over (it is CSS-hidden there anyway).
+  useEffect(() => {
+    if (pathname !== "/") dismissBootShell();
+  }, [pathname]);
+
   return (
     <AppProvider>
       <div className={cn("relative flex h-screen w-full flex-col overflow-hidden bg-canvas", "desktop-app-container")}>

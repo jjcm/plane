@@ -4,8 +4,10 @@
  * See the LICENSE file for details.
  */
 
-import Link from "next/link";
+import { useEffect } from "react";
 import { GOD_MODE_URL } from "@plane/constants";
+// lib
+import { dismissBootShell } from "@/lib/boot-shell";
 // assets
 import GradientLogo from "@/app/assets/auth/gradient-logo.webp?url";
 import GradientBgLogo from "@/app/assets/auth/gradient-bg-logo.webp?url";
@@ -14,6 +16,11 @@ import { PlaneLockup } from "@plane/propel/icons";
 import { Button } from "@plane/propel/button";
 
 export function InstanceNotReady() {
+  // never leave the static boot shell covering the setup screen
+  useEffect(() => {
+    dismissBootShell();
+  }, []);
+
   return (
     <DefaultLayout>
       <div className="relative z-10 flex h-screen w-screen overflow-hidden">
