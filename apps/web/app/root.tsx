@@ -31,11 +31,10 @@ import { isStaleAssetError, recoverFromStaleAsset } from "@/lib/stale-asset-erro
 import { BOOT_SHELL_ROUTE_SCRIPT, BOOT_SHELL_STYLE, StaticBootShell } from "./boot-shell";
 import { CustomErrorComponent } from "./error";
 import { AppProvider } from "./provider";
-// fonts
-import "@fontsource-variable/inter";
+// fonts — the @font-face stylesheets load with the app bundle (see
+// core/lib/wrappers/store-wrapper.tsx) so no render-blocking stylesheet
+// remains in <head>; the boot shell carries its own inline @font-face.
 import interVariableWoff2 from "@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url";
-import "@fontsource/material-symbols-rounded";
-import "@fontsource/ibm-plex-mono";
 
 const APP_TITLE = "Plane | Simple, extensible, open-source project management tool.";
 

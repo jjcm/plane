@@ -7,6 +7,11 @@
 import type { ReactNode } from "react";
 import { useEffect, useRef } from "react";
 import { observer } from "mobx-react";
+// fonts — loaded with the app bundle instead of the root route so the
+// @font-face stylesheet does not block the boot shell's first paint
+import "@fontsource-variable/inter";
+import "@fontsource/material-symbols-rounded";
+import "@fontsource/ibm-plex-mono";
 import { useParams } from "next/navigation";
 import { useTheme } from "next-themes";
 // helpers
