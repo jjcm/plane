@@ -4,7 +4,10 @@
  * See the LICENSE file for details.
  */
 
+import { useEffect } from "react";
 import { useTheme } from "next-themes";
+// lib
+import { dismissBootShell } from "@/lib/boot-shell";
 // assets
 import maintenanceModeDarkModeImage from "@/app/assets/instance/maintenance-mode-dark.svg?url";
 import maintenanceModeLightModeImage from "@/app/assets/instance/maintenance-mode-light.svg?url";
@@ -16,6 +19,11 @@ import { MaintenanceMessage } from "./maintenance-message";
 export function MaintenanceView() {
   // hooks
   const { resolvedTheme } = useTheme();
+
+  // never leave the static boot shell covering the maintenance screen
+  useEffect(() => {
+    dismissBootShell();
+  }, []);
   // derived values
   const maintenanceModeImage = resolvedTheme === "dark" ? maintenanceModeDarkModeImage : maintenanceModeLightModeImage;
   return (

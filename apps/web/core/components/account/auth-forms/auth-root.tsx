@@ -21,6 +21,7 @@ import {
 // hooks
 import { useOAuthConfig } from "@/hooks/oauth";
 import { useInstance } from "@/hooks/store/use-instance";
+import { dismissBootShell } from "@/lib/boot-shell";
 // local imports
 import { TermsAndConditions } from "../terms-and-conditions";
 import { AuthBanner } from "./auth-banner";
@@ -57,6 +58,11 @@ export const AuthRoot = observer(function AuthRoot(props: TAuthRoot) {
   useEffect(() => {
     if (!authMode && currentAuthMode) setAuthMode(currentAuthMode);
   }, [currentAuthMode, authMode]);
+
+  // the real form is on screen; drop the static boot shell overlaying it
+  useEffect(() => {
+    if (authMode) dismissBootShell();
+  }, [authMode]);
 
   useEffect(() => {
     if (error_code && authMode) {

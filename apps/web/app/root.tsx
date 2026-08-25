@@ -5,7 +5,8 @@
  */
 
 import type { ReactNode } from "react";
-import { Links, Meta, Outlet, Scripts } from "react-router";
+import { useEffect } from "react";
+import { Links, Meta, Outlet, Scripts, useLocation } from "react-router";
 import type { LinksFunction } from "react-router";
 import { ThemeProvider, useTheme } from "next-themes";
 // plane imports
@@ -24,15 +25,16 @@ import type { Route } from "./+types/root";
 // components
 import { LogoSpinner } from "@/components/common/logo-spinner";
 // lib
+import { dismissBootShell } from "@/lib/boot-shell";
 import { isStaleAssetError, recoverFromStaleAsset } from "@/lib/stale-asset-error";
 // local
+import { BOOT_SHELL_ROUTE_SCRIPT, BOOT_SHELL_STYLE, StaticBootShell } from "./boot-shell";
 import { CustomErrorComponent } from "./error";
 import { AppProvider } from "./provider";
-// fonts
-import "@fontsource-variable/inter";
+// fonts — the @font-face stylesheets load with the app bundle (see
+// core/lib/wrappers/store-wrapper.tsx) so no render-blocking stylesheet
+// remains in <head>; the boot shell carries its own inline @font-face.
 import interVariableWoff2 from "@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url";
-import "@fontsource/material-symbols-rounded";
-import "@fontsource/ibm-plex-mono";
 
 const APP_TITLE = "Plane | Simple, extensible, open-source project management tool.";
 
@@ -45,7 +47,9 @@ export const links: LinksFunction = () => [
   { rel: "apple-touch-icon", sizes: "180x180", href: icon180 },
   { rel: "apple-touch-icon", sizes: "512x512", href: icon512 },
   { rel: "manifest", href: "/manifest.json" },
-  { rel: "stylesheet", href: globalStyles },
+  // The global stylesheet is preloaded here but applied from the end of
+  // <body>, so it does not block first paint of the inline boot shell.
+  { rel: "preload", href: globalStyles, as: "style" },
   {
     rel: "preload",
     href: interVariableWoff2,
@@ -71,13 +75,17 @@ export function Layout({ children }: { children: ReactNode }) {
         <meta name="mobile-web-app-capable" content="yes" />
         <Meta />
         <Links />
+        <style dangerouslySetInnerHTML={{ __html: BOOT_SHELL_STYLE }} />
       </head>
       <body suppressHydrationWarning>
+        <script dangerouslySetInnerHTML={{ __html: BOOT_SHELL_ROUTE_SCRIPT }} />
+        <StaticBootShell />
         <div id="context-menu-portal" />
         <div id="editor-portal" />
         <ThemeProvider themes={["light", "dark", "light-contrast", "dark-contrast", "custom"]} defaultTheme="system">
           {children}
         </ThemeProvider>
+        <link rel="stylesheet" href={globalStyles} />
         <Scripts />
       </body>
     </html>
@@ -111,6 +119,14 @@ export const meta: Route.MetaFunction = () => [
 ];
 
 export default function Root() {
+  const { pathname } = useLocation();
+
+  // The static boot shell mirrors the sign-in page, so any other route can
+  // drop it as soon as the app takes over (it is CSS-hidden there anyway).
+  useEffect(() => {
+    if (pathname !== "/") dismissBootShell();
+  }, [pathname]);
+
   return (
     <AppProvider>
       <div className={cn("relative flex h-screen w-full flex-col overflow-hidden bg-canvas", "desktop-app-container")}>

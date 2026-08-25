@@ -4,8 +4,11 @@
  * See the LICENSE file for details.
  */
 
+import { useEffect } from "react";
 // hooks
 import { useAppRouter } from "@/hooks/use-app-router";
+// lib
+import { dismissBootShell } from "@/lib/boot-shell";
 // layouts
 import { DevErrorComponent } from "./dev";
 import { ProdErrorComponent } from "./prod";
@@ -13,6 +16,11 @@ import { ProdErrorComponent } from "./prod";
 export function CustomErrorComponent({ error }: { error: unknown }) {
   // router
   const router = useAppRouter();
+
+  // never leave the static boot shell covering an error screen
+  useEffect(() => {
+    dismissBootShell();
+  }, []);
 
   const handleGoHome = () => router.push("/");
   const handleReload = () => window.location.reload();
